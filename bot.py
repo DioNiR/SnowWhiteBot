@@ -39,6 +39,7 @@ command_start = command.CommandStart(bot)
 command_help = command.CommandHelp(bot)
 command_weather = command.CommandWeather(bot, scheduler)
 command_ps4 = command.CommandPS4(bot, scheduler)
+command_chat_questions = command.CommandChatQuestions(bot, scheduler)
 
 dp.register_message_handler(command_start.main, commands=["start"])
 dp.register_message_handler(command_help.main, commands=["help"])
@@ -50,6 +51,8 @@ dp.register_callback_query_handler(command_call.callback_kb_cause, lambda c: c.d
 
 dp.register_message_handler(command_weather.main, commands=["погода"])
 dp.register_message_handler(command_ps4.main, commands=["ps4"])
+
+dp.register_message_handler(command_chat_questions.main, regexp='\!создать вопрос')
 
 
 @dp.message_handler()
