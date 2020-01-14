@@ -52,7 +52,10 @@ dp.register_callback_query_handler(command_call.callback_kb_cause, lambda c: c.d
 dp.register_message_handler(command_weather.main, commands=["погода"])
 dp.register_message_handler(command_ps4.main, commands=["ps4"])
 
-dp.register_message_handler(command_chat_questions.main, regexp='\!создать вопрос')
+dp.register_message_handler(command_chat_questions.create_question, regexp='\!создать вопрос')
+
+dp.register_message_handler(command_chat_questions.main)
+
 
 
 @dp.message_handler()
