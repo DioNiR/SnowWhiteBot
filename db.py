@@ -87,7 +87,6 @@ class db:
         self.c.execute(sql, (chat_id, ))
         return self.c.fetchall()
 
- 
     def select_product_by_id(self, product_id):
         sql = '''SELECT * FROM product WHERE id = ?'''
         self.c.execute(sql, (product_id))

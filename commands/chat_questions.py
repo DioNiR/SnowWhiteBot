@@ -7,12 +7,16 @@ from aiogram.types import ReplyKeyboardRemove, \
 
 from config import *
 
+from mongo_db import *
+
 class CommandChatQuestions:
     answers = {}
 
     def __init__(self, bot: Bot, logger: logging.Logger=None):
         self.bot = bot
         self.logger = logger if logger is not None else logging.getLogger("CommandChatQuestions")
+
+        self.db = mongo_db(self.logger)
 
         self.send_message = self.bot.send_message
 
@@ -53,7 +57,9 @@ class CommandChatQuestions:
         message_question_add_success = await message.reply(text = message_text)
         self.message_question_add_success_id = message_question_add_success['message_id']
 
-        print(message)     
+        self.message_question_add_success_db_id = await self.db.insert_question(self.question_name, message['from']['id'])
+
+     
 
     async def text_answer(self, message_question_id, message):
         answer_name = message['text']
@@ -76,6 +82,10 @@ class CommandChatQuestions:
         else:
             self.answers[message_question_id] = {}
             self.answers[message_question_id][message_answer_add_success['message_id']] = message['text']
+
+        print(self.message_question_add_success_db_id) 
+
+        await self.db.insert_answer(self.message_question_add_success_db_id, answer_name)
 
         print(self.answers) 
 
