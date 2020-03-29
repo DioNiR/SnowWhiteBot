@@ -57,6 +57,7 @@ dp.register_message_handler(command_weather.main, commands=["погода"])
 dp.register_message_handler(command_chat_questions.create_question, regexp='!создать вопрос')
 dp.register_message_handler(command_chat_questions.my_questions, regexp='!мои вопросы')
 dp.register_message_handler(command_chat_questions.question, regexp='/вопрос')
+dp.register_callback_query_handler(command_chat_questions.callback_kb_vote, lambda c: c.data and c.data.startswith('vote_'))
 
 dp.register_message_handler(command_chat_questions.main)
 

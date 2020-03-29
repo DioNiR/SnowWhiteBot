@@ -1,5 +1,8 @@
 import logging
+
+from aiogram import types
 from aiogram.bot import Bot
+from aiogram.types import ParseMode
 from aiogram.utils.markdown import text
 from aiogram.types import ReplyKeyboardRemove, \
     ReplyKeyboardMarkup, KeyboardButton, \
@@ -36,8 +39,48 @@ class CommandChatQuestions:
         await message.reply(text=message_text)
 
     async def question(self, message):
-        row = self.db.select_random_questions(message['from']['id'])
-        print(row)
+        question_row = self.db.select_random_questions(message['from']['id'])
+        answers_row  = self.db.select_question_answers(question_id = question_row[0][0])
+
+        question_id = question_row[0][0]
+
+        messages = [f'{question_row[0][3]}\n']
+        inline_btn = []
+        inline_kb_full = InlineKeyboardMarkup()
+
+
+        a = 0
+        for answer in answers_row:
+            a += 1
+            messages.append(f'{a}. {answer[3]}\n')
+
+            inline_btn.append(InlineKeyboardButton(a, callback_data = f'vote_{question_id}_{answer[0]}'))
+
+        inline_kb_full.row(*inline_btn)
+
+
+        await self.bot.send_message(message.chat.id, text(*messages), reply_markup = inline_kb_full)
+
+    async def callback_kb_vote(self, callback_query: types.CallbackQuery):
+        print(callback_query)
+
+        data = callback_query.data.split('_')
+
+        question_id = data[1]
+        answer_id   = data[2]
+        user_id     = callback_query.message['from']['id']
+
+        is_vote = self.db.ckeck_answer_user_vote(question_id, answer_id, user_id)
+        print(is_vote)
+
+        if is_vote == None:
+            await self.bot.answer_callback_query(callback_query.id, text='Ваш голос засчитан', show_alert=True)
+            points = self.db.get_answer_points_by_id(answer_id)
+            self.db.add_answer_vote(question_id, answer_id, user_id, points = points[0])
+        else:
+            await self.bot.answer_callback_query(callback_query.id, text='Вы уже голосовали', show_alert=True)
+
+
 
     async def main(self, message):
         if 'reply_to_message' in message:

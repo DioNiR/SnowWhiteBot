@@ -31,7 +31,7 @@ class db:
         self.c.execute(sql)
         self.conn.commit()
 
-        sql = '''CREATE TABLE IF NOT EXISTS question_votes (id integer primary key, question_id integer, user_id integer, points integer default 1)'''
+        sql = '''CREATE TABLE IF NOT EXISTS question_votes (id integer primary key, question_id integer, answer_id integer, user_id integer, points integer default 1)'''
         self.c.execute(sql)
         self.conn.commit()
 
@@ -115,6 +115,14 @@ class db:
         except sqlite3.Error as e:
             print(type(e).__name__)
 
+    def select_question_answers(self, question_id):
+        try:
+            sql = '''SELECT * FROM answers WHERE question_id = ?'''
+            self.c.execute(sql, (question_id,))
+            return self.c.fetchall()
+        except sqlite3.Error as e:
+            print(type(e).__name__)
+
     def select_question_by_message_id(self, message_id):
         sql = '''SELECT * FROM questions WHERE message_id = ?'''
         self.c.execute(sql, (message_id,))
@@ -128,6 +136,11 @@ class db:
     def update_answer_points_by_id(self, answer_id, points):
         sql = '''UPDATE answers SET points = ? WHERE id = ?'''
         self.c.execute(sql, (points, answer_id))
+
+    def get_answer_points_by_id(self, answer_id):
+        sql = '''SELECT points FROM answers WHERE id = ?'''
+        self.c.execute(sql, (answer_id,))
+        return self.c.fetchone()
 
     def select_questions_by_author(self, author_id):
         sql = '''SELECT * FROM questions WHERE author_id = ?'''
@@ -150,3 +163,18 @@ class db:
             print(e)
 
         return self.c.fetchall()
+
+    def ckeck_answer_user_vote(self, question_id, answer_id, user_id):
+        sql = '''SELECT * FROM question_votes WHERE question_id = ? AND user_id = ?'''
+        self.c.execute(sql, (question_id, user_id))
+        return self.c.fetchone()
+
+    def add_answer_vote(self, question_id, answer_id, user_id, points = 1):
+        try:
+            sql = '''INSERT INTO question_votes('question_id','answer_id', 'user_id', 'points') VALUES (?, ?, ?, ?)'''
+            self.c.execute(sql, (question_id, answer_id, user_id, points))
+            self.conn.commit()
+            return self.c.lastrowid
+        except sqlite3.Error as e:
+            print(type(e).__name__)
+            print("Database error: %s" % e)
