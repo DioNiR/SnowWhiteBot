@@ -3,8 +3,11 @@ from aiogram.utils.markdown import text
 MY_ID = 272590789
 
 DB_FILENAME = 'botuploads.db'
-
+#Dev
 TOKEN = '1043413769:AAHV6QU-_N4CKX0rtIClVDLD6Z1wNUUNySc'
+
+# Prod
+# TOKEN = '753135015:AAE398rDss1bLXVLbpQKFLmu20iarSDS9ug'
 
 PROXY_URL = 'socks5://learn:python@t1.learn.python.ru:1080' 
 
