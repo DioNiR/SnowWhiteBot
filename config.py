@@ -1,4 +1,5 @@
 from aiogram.utils.markdown import text
+from aiogram.types import KeyboardButton
 
 MY_ID = 272590789
 
@@ -40,3 +41,7 @@ RANDOM_PHOTOS [
 '''
 
 UNDER_CONSTRUCTION = 'AgADAgAD_KsxG5HJ6Uvw3pDITRONS_NqXA8ABAEAAwIAA3gAA_wRAwABFgQ'
+buttons = []
+buttons.append([KeyboardButton('/говори'),   KeyboardButton('/замолчи')])
+buttons.append([KeyboardButton('/вызывай'), KeyboardButton('/хватит')])
+buttons.append([KeyboardButton('/погода'), KeyboardButton('/ps4')])

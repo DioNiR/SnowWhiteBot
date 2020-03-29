@@ -28,7 +28,10 @@ class CommandChatQuestions(commands):
         self.dp.register_message_handler(self.question, regexp='/вопрос')
         self.dp.register_callback_query_handler(self.callback_kb_vote,
                                            lambda c: c.data and c.data.startswith('vote_'))
-        self.dp.register_message_handler(self.main)
+
+
+    async def listen(self, message):
+        await self.main(message)
 
     async def create_question(self, message):
         message_question = await self.bot.send_message(message.chat.id, 'Напишите вопрос ответом на это сообщение')

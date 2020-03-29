@@ -1,17 +1,8 @@
 import logging
-import asyncio
-import os
-import datetime
 
 from aiogram import Bot, types
 from aiogram.utils import executor
-from aiogram.types import ParseMode
-from aiogram.dispatcher import Dispatcher, filters
-from aiogram.utils.markdown import text, bold, italic, code, pre, escape_md
-import aiohttp_socks 
-from aiogram.types import ReplyKeyboardRemove, \
-    ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.dispatcher import Dispatcher
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -39,6 +30,7 @@ commands_class['start']          = command.CommandStart(dp, bot)
 commands_class['help']           = command.CommandHelp(dp, bot)
 commands_class['weather']        = command.CommandWeather(dp, bot, scheduler)
 commands_class['ps4']            = command.CommandPS4(dp, bot, scheduler)
+commands_class['say']            = command.CommandSay(dp, bot, logger)
 commands_class['chat_questions'] = command.CommandChatQuestions(dp, bot, scheduler)
 commands_class['boobs']          = command.CommandBoobsVote(dp, bot, db_connect)
 
@@ -47,6 +39,9 @@ for commands_obj in commands_class:
 
 @dp.message_handler()
 async def listen_message(message: types.Message):
+    for commands_obj in commands_class:
+        await commands_class[commands_obj].listen(message)
+
     logger.info(message)
     select_chat = db.select_chat_by_chat_id(chat_id = message.chat.id)
     if select_chat == None:

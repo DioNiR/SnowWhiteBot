@@ -40,8 +40,7 @@ class CommandCall(commands):
     def register_message_handler(self):
         self.dp.register_message_handler(self.call, commands=["вызывай"])
         self.dp.register_message_handler(self.enough, commands=["хватит"])
-        self.dp.register_callback_query_handler(self.callback_kb_cause,
-                                           lambda c: c.data and c.data.startswith('cause_'))
+        self.dp.register_callback_query_handler(self.callback_kb_cause, lambda c: c.data and c.data.startswith('cause_'))
 
     async def check_chat_obj(self, id):
         """Функция проверки экзепляра класса опредленного чата
@@ -63,7 +62,6 @@ class CommandCall(commands):
         kwargs -- kwargs
 
         """
-
         chat_id = message.chat.id
 
         await self.check_chat_obj(chat_id)
