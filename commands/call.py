@@ -96,10 +96,6 @@ class CommandCall:
 
         message_from_id = message['from']['id']
 
-        if message_from_id == 305554419:
-            await self.ogyrec(message)
-            return
-
         inline_kb_full = InlineKeyboardMarkup(row_width = 2)
         members = self.db.select_chat_members_by_chat_id(chat_id = message.chat.id)
 

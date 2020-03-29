@@ -23,6 +23,19 @@ class db:
         self.conn.commit()
 
 
+        sql = '''CREATE TABLE IF NOT EXISTS questions (id integer primary key, message_id integer, author_id integer, question_text text)'''
+        self.c.execute(sql)
+        self.conn.commit()
+
+        sql = '''CREATE TABLE IF NOT EXISTS answers (id integer primary key, question_id integer, message_id integer, answer_text text, points integer default 1)'''
+        self.c.execute(sql)
+        self.conn.commit()
+
+        sql = '''CREATE TABLE IF NOT EXISTS question_votes (id integer primary key, question_id integer, user_id integer, points integer default 1)'''
+        self.c.execute(sql)
+        self.conn.commit()
+
+
     def insert_chat(self, chat_id, chat_name):
         """Метод добавления чата в БД
 
@@ -87,19 +100,53 @@ class db:
         self.c.execute(sql, (chat_id, ))
         return self.c.fetchall()
 
-    def select_product_by_id(self, product_id):
-        sql = '''SELECT * FROM product WHERE id = ?'''
-        self.c.execute(sql, (product_id))
-        return self.c.fetchall() 
+    def insert_question(self, question_text, message_id, author_id):
+        sql = '''INSERT INTO questions('author_id', 'message_id', 'question_text') VALUES (?, ?, ?)'''
+        self.c.execute(sql, (author_id, message_id, question_text))
+        self.conn.commit()
+        return self.c.lastrowid
 
-    def select_product_by_key(self, product_key):
-        sql = '''SELECT * FROM product WHERE sky = ?'''
-        self.c.execute(sql, (product_key))
+    def insert_answer(self, question_id, message_id, answer_text):
+        try:
+            sql = '''INSERT INTO answers('question_id','message_id', 'answer_text') VALUES (?, ?, ?)'''
+            self.c.execute(sql, (question_id, message_id, answer_text))
+            self.conn.commit()
+            return self.c.lastrowid
+        except sqlite3.Error as e:
+            print(type(e).__name__)
+
+    def select_question_by_message_id(self, message_id):
+        sql = '''SELECT * FROM questions WHERE message_id = ?'''
+        self.c.execute(sql, (message_id,))
+        return self.c.fetchone()
+
+    def select_answer_by_message_id(self, message_id):
+        sql = '''SELECT * FROM answers WHERE message_id = ?'''
+        self.c.execute(sql, (message_id,))
+        return self.c.fetchone()
+
+    def update_answer_points_by_id(self, answer_id, points):
+        sql = '''UPDATE answers SET points = ? WHERE id = ?'''
+        self.c.execute(sql, (points, answer_id))
+
+    def select_questions_by_author(self, author_id):
+        sql = '''SELECT * FROM questions WHERE author_id = ?'''
+        self.c.execute(sql, (author_id,))
         return self.c.fetchall()
 
-    def insert_product_data(self, category_id, sku, name, url):
-        sql = '''INSERT INTO products(category_id, sku, name, url) VALUES(?, ?, ?, ?)'''
-        self.c.execute(sql, (category_id, sku, name, url))
-        self.conn.commit()
+    def select_questions_not_votes(self, user_id):
+        sql = '''
+            SELECT * FROM questions WHERE id NOT IN (SELECT question_id FROM question_votes WHERE user_id = ?)
+        '''
 
-        return self.c.lastrowid
+    def select_random_questions(self, user_id):
+        sql = '''
+            SELECT * FROM questions WHERE id NOT IN (SELECT question_id FROM question_votes WHERE user_id = ?) ORDER BY RANDOM() LIMIT 1
+        '''
+        try:
+            self.c.execute(sql, (user_id,))
+
+        except sqlite3.Error as e:
+            print(e)
+
+        return self.c.fetchall()

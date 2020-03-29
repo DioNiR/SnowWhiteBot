@@ -21,9 +21,12 @@ from db import *
 
 import commands as command
 
-logging.basicConfig(filename="bot.log", level=logging.INFO)
+#logging.basicConfig(filename="bot.log", level=logging.DEBUG)
+#logger = logging.getLogger("SnowWhiteBot")
 
-logger = logging.getLogger("SnowWhiteBot")
+logger = None
+
+
 
 
 bot = Bot(token=TOKEN, proxy=PROXY_URL)
@@ -50,12 +53,12 @@ dp.register_callback_query_handler(command_call.callback_kb_cause, lambda c: c.d
 
 
 dp.register_message_handler(command_weather.main, commands=["погода"])
-dp.register_message_handler(command_ps4.main, commands=["ps4"])
 
-dp.register_message_handler(command_chat_questions.create_question, regexp='\!создать вопрос')
+dp.register_message_handler(command_chat_questions.create_question, regexp='!создать вопрос')
+dp.register_message_handler(command_chat_questions.my_questions, regexp='!мои вопросы')
+dp.register_message_handler(command_chat_questions.question, regexp='/вопрос')
 
 dp.register_message_handler(command_chat_questions.main)
-
 
 
 @dp.message_handler()

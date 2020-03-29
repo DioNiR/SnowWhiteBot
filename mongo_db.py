@@ -39,3 +39,10 @@ class mongo_db:
         document = dict(find)
         document['answers'].append({'answer_text': answer_text})
         await collection.update_one({'_id': question_id}, {'$set': document})
+
+    async def insert_number_ball(self, question_id, answer_text):
+        collection = self.db['questions']
+        find = await collection.find_one({'_id': question_id})
+        document = dict(find)
+        document['answers'].append({'answer_text': answer_text})
+        await collection.update_one({'_id': question_id}, {'$set': document})

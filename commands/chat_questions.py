@@ -7,7 +7,7 @@ from aiogram.types import ReplyKeyboardRemove, \
 
 from config import *
 
-from mongo_db import *
+from db import *
 
 class CommandChatQuestions:
     answers = {}
@@ -16,7 +16,7 @@ class CommandChatQuestions:
         self.bot = bot
         self.logger = logger if logger is not None else logging.getLogger("CommandChatQuestions")
 
-        self.db = mongo_db(self.logger)
+        self.db = db(self.logger)
 
         self.send_message = self.bot.send_message
 
@@ -26,42 +26,55 @@ class CommandChatQuestions:
 
         self.message_question_id = message_question['message_id']
 
+    async def my_questions(self, message):
+        questions = ["Ваши вопросы:\n"]
+
+        for row in self.db.select_questions_by_author(message['from']['id']):
+            questions.append(f'{row[3]}\n')
+
+        message_text = text(*questions)
+        await message.reply(text=message_text)
+
+    async def question(self, message):
+        row = self.db.select_random_questions(message['from']['id'])
+        print(row)
+
     async def main(self, message):
+        if 'reply_to_message' in message:
+            reply_id = message['reply_to_message']['message_id']
 
-        if message['reply_to_message']['message_id'] == self.message_question_id:
-            await self.text_question(message)
-        elif message['reply_to_message']['message_id'] == self.message_question_add_success_id:
-            await self.text_answer(self.message_question_add_success_id, message)
-        elif message['reply_to_message']['message_id'] in self.answers[self.message_question_add_success_id]:
-            print('?????????????????????')
-            print(self.answers[self.message_question_add_success_id])
-            await self.points(message)
-            print('????????????????????')
+            if reply_id == self.message_question_id:
+                await self.text_question(message)
+            else:
+                print(message)
+                print(reply_id)
 
-        if self.answers[self.message_question_add_success_id]:
-            print(message['reply_to_message']['message_id'])
-            print(self.answers[self.message_question_add_success_id])
-        if message['reply_to_message']['message_id'] in self.answers[self.message_question_add_success_id]:
-            print('###############')
-            print(self.answers[self.message_question_add_success_id])
-            print('###############')
+                question = self.db.select_question_by_message_id(reply_id)
+                print(question)
+                if question is not None:
+                    await self.text_answer(question, message)
+
+                answer = self.db.select_answer_by_message_id(reply_id)
+                print(answer)
+                if answer is not None:
+                    await self.points(answer, message)
+        else:
+            pass
 
     async def text_question(self, message):
         self.question_name = message['text']
 
         message_text = text(
-            f"Вопос: {self.question_name}, создан.\n",
+            f"Вопос: {self.question_name}, создан.",
             "Для добавления ответов на вопрос, отвечайте на это сообщение"
         )
 
         message_question_add_success = await message.reply(text = message_text)
-        self.message_question_add_success_id = message_question_add_success['message_id']
-
-        self.message_question_add_success_db_id = await self.db.insert_question(self.question_name, message['from']['id'])
+        self.db.insert_question(self.question_name, message_question_add_success['message_id'], message['from']['id'])
 
      
 
-    async def text_answer(self, message_question_id, message):
+    async def text_answer(self, question, message):
         answer_name = message['text']
 
         message_text = text(
@@ -72,32 +85,16 @@ class CommandChatQuestions:
             "Но не больше 10",
         )
 
-        print('------------------------------------------')
-
         message_answer_add_success = await message.reply(text = message_text)
-        print(message_answer_add_success)
+        self.db.insert_answer(question[0], message_answer_add_success['message_id'], answer_name)
 
-        if message_question_id in self.answers:
-            self.answers[message_question_id][message_answer_add_success['message_id']] = message['text']
-        else:
-            self.answers[message_question_id] = {}
-            self.answers[message_question_id][message_answer_add_success['message_id']] = message['text']
+    async def points(self, answer, message):
+        point_number = int(message['text'])
 
-        print(self.message_question_add_success_db_id) 
+        if point_number < 11 and point_number > 0:
+            message_text = text(
+                f"Установленно {point_number} мерзости на ответ: {answer[3]}.",
+            )
 
-        await self.db.insert_answer(self.message_question_add_success_db_id, answer_name)
-
-        print(self.answers) 
-
-        print('------------------------------------------')
-
-    async def points(self, message):
-        point_number = message['text']
-        answer_text = self.answers[self.message_question_add_success_id][message['reply_to_message']['message_id']]
-
-        message_text = text(
-            f"Установленно {point_number} мерзости на ответ: {answer_text}.",
-            "Напишите !завершить для завершения создания вопроса или начните создавать новый вопрос с комманды !создать вопрос",
-        )
-
-        await message.reply(text = message_text)
+            await message.reply(text = message_text)
+            self.db.update_answer_points_by_id(int(answer[0]), point_number)
