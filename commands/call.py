@@ -2,21 +2,16 @@ import logging
 import asyncio
 
 from aiogram import Bot, types
-from aiogram.utils import executor
+from aiogram.dispatcher import Dispatcher
 from aiogram.types import ParseMode
-from aiogram.dispatcher import Dispatcher, filters
-from aiogram.utils.markdown import text, bold, italic, code, pre, escape_md
-import aiohttp_socks 
-from aiogram.types import ReplyKeyboardRemove, \
-    ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from config import *
-from db import *
+import db as db
 
-import datetime
+from . import commands
 
-class CommandCall:
+class CommandCall(commands):
     call_starting   = 0
     chat_id = ''
     call_time = None
@@ -30,17 +25,23 @@ class CommandCall:
 
     command_obj = {}
 
-    def __init__(self, bot: Bot, db: db, logger: logging.Logger=None):
+    def __init__(self, dp: Dispatcher, bot: Bot, db_connect: db.old):
         self.enough_status = False
 
+        self.dp = dp
         self.bot = bot
-        self.logger = logger if logger is not None else logging.getLogger("CommandHandlers")
-        self.db = db
+        self.db = db_connect
         self.send_message = self.bot.send_message
 
     async def main(self, message, *args, **kwargs):
         pass
 
+
+    def register_message_handler(self):
+        self.dp.register_message_handler(self.call, commands=["вызывай"])
+        self.dp.register_message_handler(self.enough, commands=["хватит"])
+        self.dp.register_callback_query_handler(self.callback_kb_cause,
+                                           lambda c: c.data and c.data.startswith('cause_'))
 
     async def check_chat_obj(self, id):
         """Функция проверки экзепляра класса опредленного чата

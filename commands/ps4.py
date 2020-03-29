@@ -1,17 +1,19 @@
 import logging
+from aiogram.dispatcher import Dispatcher
 from aiogram.bot import Bot
 
 import requests
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from config import *
+from . import commands
 
 from bs4 import BeautifulSoup
 
-class CommandPS4:
-    def __init__(self, bot: Bot, scheduler: AsyncIOScheduler, logger: logging.Logger=None):
+class CommandPS4(commands):
+    def __init__(self, dp: Dispatcher, bot: Bot, scheduler: AsyncIOScheduler, logger: logging.Logger=None):
         self.bot = bot
+        self.dp = dp
         self.scheduler = scheduler
         self.logger = logger if logger is not None else logging.getLogger("CommandPS4")
         self.send_message = self.bot.send_message

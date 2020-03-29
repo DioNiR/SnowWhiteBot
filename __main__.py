@@ -16,51 +16,34 @@ from aiogram.types import ReplyKeyboardRemove, \
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config import *
-from db import *
-
-
+import db as db
 import commands as command
-
-#logging.basicConfig(filename="bot.log", level=logging.DEBUG)
-#logger = logging.getLogger("SnowWhiteBot")
 
 logger = None
 
-
-
-
 bot = Bot(token=TOKEN, proxy=PROXY_URL)
 dp = Dispatcher(bot)
-db = db(logger)
 
+logging.basicConfig(filename="bot.log", level=logging.DEBUG)
+logger = logging.getLogger("SnowWhiteBot")
+
+db_connect = db.old(logger)
 
 scheduler = AsyncIOScheduler()
 
-command_call = command.CommandCall(bot, db, logger)
-command_notification = command.CommandNotification(bot)
-command_start = command.CommandStart(bot)
-command_help = command.CommandHelp(bot)
-command_weather = command.CommandWeather(bot, scheduler)
-command_ps4 = command.CommandPS4(bot, scheduler)
-command_chat_questions = command.CommandChatQuestions(bot, scheduler)
+commands_class = {}
 
-dp.register_message_handler(command_start.main, commands=["start"])
-dp.register_message_handler(command_help.main, commands=["help"])
+commands_class['call']           = command.CommandCall(dp, bot, db_connect)
+commands_class['notification']   = command.CommandNotification(dp, bot, logger)
+commands_class['start']          = command.CommandStart(dp, bot)
+commands_class['help']           = command.CommandHelp(dp, bot)
+commands_class['weather']        = command.CommandWeather(dp, bot, scheduler)
+commands_class['ps4']            = command.CommandPS4(dp, bot, scheduler)
+commands_class['chat_questions'] = command.CommandChatQuestions(dp, bot, scheduler)
+commands_class['boobs']          = command.CommandBoobsVote(dp, bot, db_connect)
 
-dp.register_message_handler(command_call.call, commands=["вызывай"])
-dp.register_message_handler(command_call.enough, commands=["хватит"])
-dp.register_callback_query_handler(command_call.callback_kb_cause, lambda c: c.data and c.data.startswith('cause_'))
-
-
-dp.register_message_handler(command_weather.main, commands=["погода"])
-
-dp.register_message_handler(command_chat_questions.create_question, regexp='!создать вопрос')
-dp.register_message_handler(command_chat_questions.my_questions, regexp='!мои вопросы')
-dp.register_message_handler(command_chat_questions.question, regexp='/вопрос')
-dp.register_callback_query_handler(command_chat_questions.callback_kb_vote, lambda c: c.data and c.data.startswith('vote_'))
-
-dp.register_message_handler(command_chat_questions.main)
-
+for commands_obj in commands_class:
+   commands_class[commands_obj].register_message_handler()
 
 @dp.message_handler()
 async def listen_message(message: types.Message):
@@ -80,8 +63,7 @@ async def listen_message(message: types.Message):
     else:
         pass
 
-
 if __name__ == '__main__':
-    scheduler.start()
+    #scheduler.start()
     executor.start_polling(dp)
     logging.debug("Bot stopped")

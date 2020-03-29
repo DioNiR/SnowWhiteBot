@@ -1,27 +1,34 @@
 import logging
 
+from aiogram.dispatcher import Dispatcher
 from aiogram import types
 from aiogram.bot import Bot
-from aiogram.types import ParseMode
-from aiogram.utils.markdown import text
-from aiogram.types import ReplyKeyboardRemove, \
-    ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from config import *
+import db as db
 
-from db import *
+from . import commands
 
-class CommandChatQuestions:
+class CommandChatQuestions(commands):
     answers = {}
 
-    def __init__(self, bot: Bot, logger: logging.Logger=None):
+    def __init__(self, dp: Dispatcher, bot: Bot, logger: logging.Logger=None):
+        self.dp = dp
         self.bot = bot
         self.logger = logger if logger is not None else logging.getLogger("CommandChatQuestions")
 
-        self.db = db(self.logger)
+        self.db = db.old(self.logger)
 
         self.send_message = self.bot.send_message
+
+    def register_message_handler(self):
+        self.dp.register_message_handler(self.create_question, regexp='!создать вопрос')
+        self.dp.register_message_handler(self.my_questions, regexp='!мои вопросы')
+        self.dp.register_message_handler(self.question, regexp='/вопрос')
+        self.dp.register_callback_query_handler(self.callback_kb_vote,
+                                           lambda c: c.data and c.data.startswith('vote_'))
+        self.dp.register_message_handler(self.main)
 
     async def create_question(self, message):
         message_question = await self.bot.send_message(message.chat.id, 'Напишите вопрос ответом на это сообщение')

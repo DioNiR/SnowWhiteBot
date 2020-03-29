@@ -1,11 +1,14 @@
 import logging
+
+from aiogram.dispatcher import Dispatcher
 from aiogram.bot import Bot
 
-from config import *
+from . import commands
 
-class CommandNotification:
-    def __init__(self, bot: Bot, logger: logging.Logger=None):
+class CommandNotification(commands):
+    def __init__(self, dp: Dispatcher, bot: Bot, logger: logging.Logger=None):
         self.bot = bot
+        self.dp = dp
         self.logger = logger if logger is not None else logging.getLogger("CommandHandlers")
 
         self.send_message = self.bot.send_message

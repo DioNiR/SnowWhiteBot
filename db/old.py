@@ -2,8 +2,8 @@ import logging
 import sqlite3
 import os
 
-class db:
-    def __init__(self, logger: logging.Logger=None):
+class old:
+    def __init__(self, logger: logging.Logger = None):
         self.logger = logger if logger is not None else logging.getLogger("db class")
 
         dir_db = os.path.abspath(os.curdir)
@@ -17,11 +17,9 @@ class db:
         self.c.execute(sql)
         self.conn.commit()
 
-
         sql = '''CREATE TABLE IF NOT EXISTS chats (id integer primary key, chat_id integer, chat_name text)'''
         self.c.execute(sql)
         self.conn.commit()
-
 
         sql = '''CREATE TABLE IF NOT EXISTS questions (id integer primary key, message_id integer, author_id integer, question_text text)'''
         self.c.execute(sql)
@@ -34,7 +32,6 @@ class db:
         sql = '''CREATE TABLE IF NOT EXISTS question_votes (id integer primary key, question_id integer, answer_id integer, user_id integer, points integer default 1)'''
         self.c.execute(sql)
         self.conn.commit()
-
 
     def insert_chat(self, chat_id, chat_name):
         """Метод добавления чата в БД
@@ -67,7 +64,7 @@ class db:
         self.logger.info('select_chat_by_chat_id')
 
         sql = '''SELECT * FROM chats WHERE chat_id = ?'''
-        self.c.execute(sql, (chat_id, ))
+        self.c.execute(sql, (chat_id,))
 
         self.logger.info(f'chat_id: {chat_id}')
         self.logger.info(self.c.fetchone())
@@ -81,7 +78,6 @@ class db:
         sql = '''SELECT * FROM chats'''
         self.c.execute(sql)
         return self.c.fetchall()
-
 
     def insert_chat_members_data(self, chat_id, user_id, user_name):
         sql = '''INSERT INTO chat_members(chat_id, user_id, user_name) VALUES(?, ?, ?)'''
@@ -97,7 +93,7 @@ class db:
 
     def select_chat_members_by_chat_id(self, chat_id):
         sql = '''SELECT * FROM chat_members WHERE chat_id = ?'''
-        self.c.execute(sql, (chat_id, ))
+        self.c.execute(sql, (chat_id,))
         return self.c.fetchall()
 
     def insert_question(self, question_text, message_id, author_id):
@@ -169,7 +165,7 @@ class db:
         self.c.execute(sql, (question_id, user_id))
         return self.c.fetchone()
 
-    def add_answer_vote(self, question_id, answer_id, user_id, points = 1):
+    def add_answer_vote(self, question_id, answer_id, user_id, points=1):
         try:
             sql = '''INSERT INTO question_votes('question_id','answer_id', 'user_id', 'points') VALUES (?, ?, ?, ?)'''
             self.c.execute(sql, (question_id, answer_id, user_id, points))

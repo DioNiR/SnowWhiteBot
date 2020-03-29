@@ -1,5 +1,6 @@
 import logging
 from aiogram.bot import Bot
+from aiogram.dispatcher import Dispatcher
 from aiogram.types import ReplyKeyboardRemove, \
     ReplyKeyboardMarkup, KeyboardButton, \
     InlineKeyboardMarkup, InlineKeyboardButton
@@ -7,12 +8,20 @@ from aiogram.types import ReplyKeyboardRemove, \
 
 from config import *
 
-class CommandStart:
-    def __init__(self, bot: Bot, logger: logging.Logger=None):
+from . import commands
+
+class CommandStart(commands):
+    def __init__(self, dp: Dispatcher, bot: Bot, logger: logging.Logger=None):
+        self.dp = dp
+
         self.bot = bot
         self.logger = logger if logger is not None else logging.getLogger("CommandStart")
 
         self.send_message = self.bot.send_message
+
+    def register_message_handler(self):
+        self.dp.register_message_handler(self.main, commands=["start"])
+
 
     async def main(self, message):
         await message.reply(text="Привет.\n Я Бот белоснежка")

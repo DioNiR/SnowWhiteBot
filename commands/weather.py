@@ -1,4 +1,5 @@
 import logging
+from aiogram.dispatcher import Dispatcher
 from aiogram.bot import Bot
 
 import requests
@@ -7,12 +8,18 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config import *
 
-class CommandWeather:
-    def __init__(self, bot: Bot, scheduler: AsyncIOScheduler, logger: logging.Logger=None):
+from . import commands
+
+class CommandWeather(commands):
+    def __init__(self, dp: Dispatcher, bot: Bot, scheduler: AsyncIOScheduler, logger: logging.Logger=None):
+        self.dp = dp
         self.bot = bot
         self.scheduler = scheduler
         self.logger = logger if logger is not None else logging.getLogger("CommandWeather")
         self.send_message = self.bot.send_message
+
+    def register_message_handler(self):
+        self.dp.register_message_handler(self.main, commands=["погода"])
 
     async def main(self, message):
         weather = await self.weather_by_city("Moscow, Russia")
