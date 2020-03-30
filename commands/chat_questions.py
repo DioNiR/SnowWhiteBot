@@ -21,6 +21,7 @@ class CommandChatQuestions(commands):
         self.db = db.old(self.logger)
 
         self.send_message = self.bot.send_message
+        self.message_question_id = ''
 
     def register_message_handler(self):
         self.dp.register_message_handler(self.create_question, regexp='!создать вопрос')

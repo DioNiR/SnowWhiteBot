@@ -5,10 +5,10 @@ MY_ID = 272590789
 
 DB_FILENAME = 'botuploads.db'
 #Dev
-TOKEN = '1043413769:AAHV6QU-_N4CKX0rtIClVDLD6Z1wNUUNySc'
+#TOKEN = '1043413769:AAHV6QU-_N4CKX0rtIClVDLD6Z1wNUUNySc'
 
 # Prod
-# TOKEN = '753135015:AAE398rDss1bLXVLbpQKFLmu20iarSDS9ug'
+TOKEN = '753135015:AAE398rDss1bLXVLbpQKFLmu20iarSDS9ug'
 
 PROXY_URL = 'socks5://learn:python@t1.learn.python.ru:1080' 
 
@@ -21,9 +21,6 @@ ignore_nicks = ['DioNiR', 'DimkaSnowWhiteBot',]
 help_message = text(
     "Доступные команды:\n",
     "/start - приветствие\n",
-    "/вызывай - попросить бота показать список кого можно вызвать\n",
-    "/вызывай @nick - попросить бота вызывать определенного человека\n",
-    "/хватит - приостанавливает вызов человека",
     sep="\n"
 )
 

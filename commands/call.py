@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import sys
 
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
@@ -50,7 +51,7 @@ class CommandCall(commands):
 
         """
         if id not in self.command_obj:
-            self.command_obj[id] = CommandCall(self.bot, self.db)
+            self.command_obj[id] = CommandCall(self.dp, self.bot, self.db)
         
 
     async def call(self, message, *args, **kwargs):
@@ -63,9 +64,11 @@ class CommandCall(commands):
 
         """
         chat_id = message.chat.id
-
-        await self.check_chat_obj(chat_id)
-        await self.command_obj[chat_id].command_call(message, args)
+        try:
+            await self.check_chat_obj(chat_id)
+            await self.command_obj[chat_id].command_call(message, *args)
+        except:
+            print(sys.exc_info()[0])
 
     async def enough(self, message, *args, **kwargs):
         """Функция комманда /хватит
@@ -77,9 +80,11 @@ class CommandCall(commands):
 
         """
         chat_id = message.chat.id
-
-        await self.check_chat_obj(chat_id)
-        await self.command_obj[chat_id].command_enough(message)
+        try:
+            await self.check_chat_obj(chat_id)
+            await self.command_obj[chat_id].command_enough(message)
+        except:
+            print(sys.exc_info())
 
     async def ogyrec(self, message):
         await message.reply("Извините пользователи с низким IQ не могут вызывать людей")
@@ -143,7 +148,9 @@ class CommandCall(commands):
         await self.command_obj[chat_id].process_callback_kb_cause(callback_query)
 
 
-    async def command_call(self, message, args):
+    async def command_call(self, message, *args):
+
+
         """Функция обработки комманды вызова
 
         Keyword arguments:

@@ -50,10 +50,12 @@ class CommandPS4(commands):
             self.db.update_price_by_product_id(product_id, data['price'])
             text = f"Цена: {data['price']}р"
         else:
+            self.db.update_price_by_product_id(product_id, data['price'])
+
             text = f"Цена не изменилась: {data['price']}р"
 
             if data['price'] > last_price[0]:
-                text = f"Цена поднилась! {last_price} > {data['price']}р"
+                text = f"Цена поднялась! {last_price} > {data['price']}р"
             elif data['price'] < last_price[0]:
                 text = f"Цена уменьшилась! {last_price} > {data['price']}р"
 
